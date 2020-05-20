@@ -27,7 +27,7 @@ class TrafficApiClient:
             print(f"응답이 유효하지 않습니다: {res.__str__()}")
         return result
     
-    def run(self, code_fname, key_path, start, end):
+    def run(self, key_path, code_fname='data/codes/지역코드.csv', start=2012, end=2017):
         codes = pd.read_csv(code_fname)
         url = 'http://apis.data.go.kr/B552061/trafficAccidentDeath/getRestTrafficAccidentDeath'
 

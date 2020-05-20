@@ -25,7 +25,7 @@ pip install -r requirements.txt
 [TAAS GIS 시스템](http://taas.koroad.or.kr/gis/mcm/mcl/initMap.do?menuId=GIS_GMP_STS_RSN) 어린이사고 데이터 크롤러. 저장소 포크뜬 후 디렉토리에서 아래 명령어로 실행. `kids-accident-27.json` 파일에 데이터 저장. 권한승인이 된 아이디로 실행해주세요.
 
 ```bash
-$ python TaasCrawler.py run --login_id=YOUR-ID --login_pwd=YOUR-PASSWORD 
+$ python TaasCrawler.py run --loginid=YOUR-ID --loginpwd=YOUR-PASSWORD 
 ```
 
 ## 3. TrafficApiClient.py

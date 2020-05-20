@@ -24,7 +24,7 @@ class TaasCrawler:
             "pageIndex":"1",
             "zoneYn":"false",
             "engnCode":"00",
-            "startAcdntYear":"2018", # 검색 시작 연도
+            "startAcdntYear":"2007", # 검색 시작 연도
             "endAcdntYear":"2018", # 검색 종료 연도
             "acdntGaeCode":"01,02,03,04", # 사고조건: 사망, 중상, 경상, 부상신고
             "acdntCode":"110,120,130,140,199", # 사고유형: 차대사람(횡단중, 차도통행중, 길가장자리구역통행중, 보도통행중, 기타)

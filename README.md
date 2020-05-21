@@ -10,7 +10,7 @@
 │   │   ├── 구군코드.csv
 │   │   ├── 시도코드.csv
 │   │   └── 지역코드.csv
-│   ├── kids-accident-27.json
+│   └── kids-accident-27.json
 └── requirements.txt
 ```
 

@@ -52,7 +52,7 @@ class TaasCrawler:
             for code in tqdm(code):
                 self.payload['legaldongCode'] = code
                 res = s.post(self.data_url, data=json.dumps(self.payload), headers=self.headers)
-                if login_res.status_code != 200:
+                if res.status_code != 200:
                     raise Exception(
                         f"""
                         요청 실패 \n
@@ -62,7 +62,7 @@ class TaasCrawler:
                         """
                     )
                 json_obj = res.json()['resultValue']['accidentInfoList']
-                print(f"{legaldong_dict[code]} 지역: {len(json_obj)}건")
+                tqdm.write(f"{legaldong_dict[code]} 지역: {len(json_obj)}건")
                 result += json_obj
         print(f"총 {len(result)} 건의 데이터를 수집하였습니다. \n")
         return result
@@ -73,8 +73,10 @@ class TaasCrawler:
         self.set_login_info(loginid, loginpwd)
         json_obj = self.request_and_parse()
         filepath = f"data/kids-accident-27.json"
+        print(f"데이터 저장 중: {filepath}")
         with open(filepath, "w") as f:
             json.dump(json_obj, f)
+        print("저장되었습니다.")
 
 if __name__=='__main__':
     fire.Fire(TaasCrawler)

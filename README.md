@@ -35,3 +35,11 @@ $ python TaasCrawler.py run --loginid=YOUR-ID --loginpwd=YOUR-PASSWORD
 ```bash
 $ python TrafficApiClinet.py run --key_path=YOUR-KEY-PATH
 ```
+
+## 4. Preprocess.py
+
+input_path에는 크롤링된 데이터 경로, output_path에는 전처리 마친 데이터 저장할 경로 넣어주면 됩니다. 확장자는 `geojson`으로 해주세요.
+
+```bash
+$ python Preprocess.py run --input_path=data/kids-accident-27.json --output_path=data/kids-accident.geojson
+```

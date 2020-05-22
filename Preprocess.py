@@ -80,8 +80,10 @@ class Preprocess:
 		gdf = gpd.GeoDataFrame(
 		    df,
 		    geometry=gpd.points_from_xy(df.x_crdnt, df.y_crdnt),
-		    crs="EPSG:5179"
-		).drop(columns=['x_crdnt', 'y_crdnt']).to_crs("epsg:4326")
+		)
+
+		gdf.crs = {"init":"EPSG:5179"}
+		gdf = gdf.to_crs({"init":"epsg:4326"})
 
 		for column in gdf.columns:
 		    uniques = gdf[column].unique()

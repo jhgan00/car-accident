@@ -36,6 +36,21 @@ class TaasCrawler:
             'loginid':str(loginid),
             'loginpwd':str(loginpwd)
         }
+
+    def set_payload(self, condition):
+        condition = str(condition)
+        assert condition in ["27", "29"]
+        self.payload = {
+            "searchType":"00",
+            "pageIndex":"1",
+            "zoneYn":"false",
+            "engnCode":"00",
+            "startAcdntYear":"2007", # 검색 시작 연도
+            "endAcdntYear":"2018", # 검색 종료 연도
+            "acdntGaeCode":"01,02,03,04", # 사고조건: 사망, 중상, 경상, 부상신고
+            "acdntCode":"110,120,130,140,199", # 사고유형: 차대사람(횡단중, 차도통행중, 길가장자리구역통행중, 보도통행중, 기타)
+            "searchSimpleCondition":condition # 사고부문: 어린이사고
+        }
             
     def request_and_parse(self):
         with requests.Session() as s:
@@ -67,12 +82,13 @@ class TaasCrawler:
         print(f"총 {len(result)} 건의 데이터를 수집하였습니다. \n")
         return result
     
-    def run(self, loginid, loginpwd):
+    def run(self, loginid, loginpwd, condition):
         print("Crawler running ...")
         print("Trying LogIn...")
         self.set_login_info(loginid, loginpwd)
+        self.set_payload(condition)
         json_obj = self.request_and_parse()
-        filepath = f"data/kids-accident-27.json"
+        filepath = f"data/kids-accident-{condition}.json"
         print(f"데이터 저장 중: {filepath}")
         with open(filepath, "w") as f:
             json.dump(json_obj, f)

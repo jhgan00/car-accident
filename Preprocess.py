@@ -6,11 +6,17 @@ import fire
 
 class Preprocess:
 
-	def run(self, input_path, output_path):
+	def run(self, data_dir):
 		print("Reading raw data ...")
-		df = pd.read_json(input_path)
+		df = pd.read_json(data_dir + "/kids-accident-27.json")
+		merge_df = pd.read_json(data_dir + "/kids-accident-29.json")
 
 		print("Processing ...")
+		df = df.assign(
+			kidszone = df.acdnt_no.isin(merge_df.acdnt_no).astype(int) 
+			)
+		del(merge_df)
+
 		df=df.drop(["acdnt_year","acdnt_no","otn_acdnt_no","acdnt_frm_lv1", "acdnt_frm_lv2", "acdnt_frm_lv3", "acdnt_sta_lv1",
 		        "acdnt_sta_lv2", "city_idt_code", "city_idt_dc", "engn_code", "pageIndex",
 		        "pageUnit", "recordCountPerPage", "rn", "searchCondition", "searchConditionText",
@@ -65,6 +71,8 @@ class Preprocess:
 		    "기타불명":"0세"
 		}).str.replace("\D","").astype(int)
 
+		df = df[df.acdnt_age_2_dc < 14]
+
 		df = df.drop(code_list+[
 		    "acdnt_hdc",
 		    "acdnt_dc", # acdnt_hdc + acdnt_mdc
@@ -95,8 +103,9 @@ class Preprocess:
 		        N-unique: {uniques.size}
 		        ===========================
 		        """
-		    )
+		    )	
 
+		output_path = data_dir+"/kids-accident.geojson"
 		print(f"Saving data: {output_path}...")
 		gdf.to_file(output_path, driver="GeoJSON")
 		print("Saved data")

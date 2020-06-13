@@ -6,7 +6,7 @@ click-plugins==1.1.1
 cligj==0.5.0
 Fiona==1.8.13
 fire==0.3.1
-GDAL==3.0.4
+#GDAL==3.0.4
 geopandas==0.7.0
 idna==2.9
 munch==2.5.0
@@ -16,10 +16,6 @@ pyproj==2.6.1.post1
 python-dateutil==2.8.1
 pytz==2020.1
 requests==2.23.0
-Rtree==0.9.4
-Shapely==1.7.0
-six==1.15.0
-termcolor==1.1.0
 tqdm==4.46.0
-urllib3==1.25.9
-wincertstore==0.2
+matplotlib==3.2.1
+scikit-learn-0.23.1

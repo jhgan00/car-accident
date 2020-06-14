@@ -36,7 +36,7 @@ for (sido, df) in data.groupby("sido"):
         os.mkdir(f"figs/{sido}")
         print(f"mkdir: figs/{sido}")
     logfile = open(f"logs/{sido}.csv", "a")
-    logfile.write("eps,min_samples,ncluster,mean-cls_size,std_cls_size,outliers\n")
+    logfile.write("eps,min_samples,ncluster,outliers,count,mean,std,min,25%,50%,75%,max\n")
     prod = product(np.arange(0.0005, 0.2, 0.0005), np.arange(2,10))
     with tqdm(total=sum([1 for x in prod])) as progress_bar:
         for (eps, min_samples) in product(np.arange(0.0005, 0.2, 0.0005), np.arange(2,10)):

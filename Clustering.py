@@ -1,65 +1,111 @@
-import os
-import geopandas as gpd
-import pandas as pd
+import warnings
+import pyproj
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
+import pandas as pd
+import geopandas as gpd
+import folium
+from folium import plugins
 from sklearn.cluster import DBSCAN
-from itertools import product
-from tqdm import tqdm
+from functools import partial
+from shapely.ops import transform
+from shapely.geometry import Point
 
-gdf = gpd.read_file("data/geometry.geojson")
-df = pd.read_json("data/kids-accident-pp.json")
-df = df.assign(
-    sido=[x.split(" ")[0] for x in df.legaldong_name]
-)[['acdnt_no', 'sido']]
+warnings.filterwarnings(action="ignore")
 
-data = pd.merge(
-    pd.DataFrame({"acdnt_no":gdf.acdnt_no.values, "X":gdf.geometry.x, "Y":gdf.geometry.y}),
-    df
+proj_wgs84 = pyproj.Proj('+proj=longlat +datum=WGS84')
+
+
+def geodesic_point_buffer(point, meter):
+    # Azimuthal equidistant projection
+    aeqd_proj = '+proj=aeqd +lat_0={lat} +lon_0={lon} +x_0=0 +y_0=0'
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(aeqd_proj.format(lat=point.y, lon=point.x)),
+        proj_wgs84
+    )
+    buf = Point(0, 0).buffer(meter)  # distance in metres
+    return transform(project, buf)
+
+
+def calc_meter_area(polygon):
+    proj = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:4326'),
+        pyproj.Proj(init='epsg:3857')
+    )
+    s_new = transform(proj, polygon)
+    return s_new.area
+
+
+data = pd.read_json("data/kids-accident-pp.json")
+data = data.assign(
+    sido=[x.split()[0] for x in data.legaldong_name],
+    gugun=[x.split()[1] for x in data.legaldong_name],
+    acdnt_dd_dc=pd.to_datetime(data.acdnt_dd_dc, format="%Y-%m-%d")
 )
 
-del(df)
+gdf = gpd.read_file("data/geometry.geojson")
+gdf = gdf.assign(rad_X=np.radians(gdf.geometry.x), rad_Y=np.radians(gdf.geometry.y))
 
-if not os.path.exists("figs"):
-    os.mkdir("figs")
+# 2건 X 13년 = 26
+criterion = 26 / (300 * 300 * np.pi)
 
-if not os.path.exists("logs"):
-    os.mkdir("logs")
+seoul = data.query("sido=='서울특별시'").drop("sido", axis=1)
 
-for (sido, df) in data.groupby("sido"):
-    print(f"{sido} 지역 클러스터링")
-    tmp = gdf[gdf.acdnt_no.isin(df.acdnt_no)]
-    std_coords = StandardScaler().fit_transform(df[["X", "Y"]])
+earth_radius_km = 6371
+epsilon = 0.1 / earth_radius_km  # calculate 150 meter epsilon threshold
+min_samples = int(26 / 9)
 
-    if not os.path.exists(f"figs/{sido}"):
-        os.mkdir(f"figs/{sido}")
-        print(f"mkdir: figs/{sido}")
-    logfile = open(f"logs/{sido}.csv", "a")
-    logfile.write("eps,min_samples,ncluster,outliers,count,mean,std,min,25%,50%,75%,max\n")
-    prod = product(np.arange(0.0005, 0.2, 0.0005), np.arange(2,10))
-    with tqdm(total=sum([1 for x in prod])) as progress_bar:
-        for (eps, min_samples) in product(np.arange(0.0005, 0.2, 0.0005), np.arange(2,10)):
-            eps = round(eps, 4)
-            dbscan = DBSCAN(eps=eps, min_samples=min_samples)
-            dbscan.fit(std_coords)
-            labels = dbscan.labels_
-            ncluster = np.unique(labels).size
-            outliers = round(((dbscan.labels_ == -1).sum() / df.shape[0])*100, 2)
-            geo = tmp.copy()
-            geo = geo.assign(labels = labels)[labels!=-1]
-            if geo.shape[0] == 0:
-                continue
-            geo.plot(column="labels", markersize=1.5)
-            stats = pd.Series(dbscan.labels_).value_counts().describe().round(2).values
-            mean, std = stats[1], stats[2]
-            record = f"{eps},{min_samples},{ncluster},{outliers},"+",".join(stats.astype(str))
-            logfile.write(
-                f"{record}\n"
-            )
-            title = f"eps:{eps}, ms:{min_samples},\nncluster:{ncluster}, mean_cls_size:{mean}, std_cls_size{std}, outliers:{outliers}"
-            plt.title(title, fontdict={"fontsize":13})
-            plt.savefig(f"figs/{sido}/eps:{eps}_ms:{min_samples}.png")
-            plt.close()
-            progress_bar.update(1)
-        logfile.close()
+result = []
+for gu in seoul.gugun.unique():
+    print(gu)
+    # 클러스터 모델 적합
+    df = seoul[seoul.gugun == gu]
+    geo = gdf[gdf.acdnt_no.isin(df.acdnt_no)].drop("acdnt_no", axis=1)
+    model = DBSCAN(
+        eps=epsilon,
+        min_samples=min_samples,
+        n_jobs=6
+    )
+    model.fit(geo[["rad_X", "rad_Y"]])
+    if model.labels_.max() == -1:
+        print("-----------------------------------")
+        print("클러스터 없음")
+        print("-----------------------------------\n")
+        continue
+    before = pd.Series(model.labels_).value_counts().sort_index().reset_index().rename(
+        columns={"index": "cluster", 0: "count"})
+
+    # 밀도 계산
+    geo = geo.assign(
+        labels=model.labels_
+    ).query("labels!=-1").assign(geometry=geo.geometry.apply(geodesic_point_buffer, meter=100))
+
+    geo = pd.merge(
+        geo.dissolve(by="labels").reset_index(),
+        geo.labels.value_counts().reset_index().rename(columns={"labels": "cls_size", "index": "labels"})
+    )
+    geo = geo.assign(meter_area=geo.geometry.apply(calc_meter_area))
+    geo = geo.assign(density=geo.cls_size / geo.meter_area)
+
+    print("-----------------------------------")
+    print(
+        before.assign(
+            alive=before.cluster.isin(geo[geo.density > criterion].labels),
+            density=[0] + list(geo.sort_values("labels").density)
+        )
+    )
+    print("-----------------------------------\n")
+    result.append(geo.copy())
+
+cluster = pd.concat(result).query(f"density > {criterion}")
+acdnt_cls = gpd.sjoin(gdf[['geometry', 'acdnt_no']], cluster[['labels', 'geometry']], op="within")
+acdnt_cls = pd.merge(acdnt_cls, data)
+acdnt_cls = acdnt_cls.assign(acdnt_dd_dc=acdnt_cls.acdnt_dd_dc.astype(str))
+
+m = folium.Map(location=[37.53, 126.97], zoom_start=12)
+
+plugins.ScrollZoomToggler().add_to(m)
+folium.features.GeoJson(cluster).add_to(m)
+folium.features.GeoJson(acdnt_cls).add_to(m)
+m.save("cluster.html")

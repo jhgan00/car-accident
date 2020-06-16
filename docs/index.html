@@ -1566,30 +1566,28 @@ div.tocify {
 
 
 <ul>
-<li><a href="https://https://jhgan00.github.io/car-accident/kids-accident.html">어린이 교통사고 현황</a></li>
-<li><a href="https://jhgan00.github.io/car-accident/EDA.html">탐색적 데이터 분석</a></li>
-<li><a href="https://jhgan00.github.io/car-accident/cluster.html">클러스터링 결과</a></li>
+<li><a href="https://jhgan00.github.io/car-accident/kids-accident.html">01. 어린이 교통사고 현황</a></li>
+<li><a href="https://jhgan00.github.io/car-accident/EDA.html">02. 탐색적 데이터 분석</a></li>
+<li><a href="https://jhgan00.github.io/car-accident/cluster.html">03. 클러스터링 결과</a></li>
 </ul>
-<div id="어린이-교통사고-분석" class="section level1">
-<h1>어린이 교통사고 분석</h1>
-<pre class="bash"><code>├── Clustering.py
-├── EDA&amp;시각화
-├── EDA.ipynb
+<pre class="bash"><code>├── ClusterVisualization.py
+├── Clustering.py
 ├── Preprocess.py
 ├── README.md
+├── Schoolzone.py
 ├── TaasCrawler.py
 ├── data
-│   ├── accident-total-pp.geojson
-│   ├── accident-total-pp.json
-│   ├── accident-total.json
-│   ├── kids-accident-27.json
-│   ├── kids-accident-29.json
-│   ├── kids-accident-pp.geojson
-│   └── kids-accident-pp.json
-├── preprocessing
-│   └── 데이터 전처리.ipynb
-├── requirements.txt
-└── 클러스터링_실험.ipynb
+│   ├── maps
+│   │   ├── CTPRVN.dbf
+│   │   ├── CTPRVN.prj
+│   │   ├── CTPRVN.shp
+│   │   ├── CTPRVN.shx
+│   │   ├── N3A_A0053326.dbf
+│   │   ├── N3A_A0053326.shp
+│   │   ├── N3A_A0053326.shx
+│   │   └── schoolzone-seoul.geojson
+│   └── 전국어린이보호구역표준데이터.csv
+└── requirements.txt
 </code></pre>
 <div id="requirements" class="section level2">
 <h2>1. Requirements</h2>
@@ -1601,18 +1599,34 @@ div.tocify {
 </div>
 <div id="taascrawler.py" class="section level2">
 <h2>2. TaasCrawler.py</h2>
-<p><a href="http://taas.koroad.or.kr/gis/mcm/mcl/initMap.do?menuId=GIS_GMP_STS_RSN">TAAS GIS 시스템</a> 교통사고 데이터 크롤러입니다. 권한승인이 된 아이디를 준비해서 아래 커맨드로 실행해주시면 됩니. <code>data/kids-accident-27.json</code>은 어린이 교통사고, <code>data/kids-accident-29.json</code>는 어린이보호구역 내 어린이교통사고입니다. 어린이 교통사고가 아닌 전체 교통사고 데이터를 수집하려면 <code>--kids=0</code> 으로 설정해주세요.</p>
-<pre class="bash"><code>$ python TaasCrawler.py run
-$ python TaasCrawler.py run --kids=0</code></pre>
+<p><a href="http://taas.koroad.or.kr/gis/mcm/mcl/initMap.do?menuId=GIS_GMP_STS_RSN">TAAS GIS 시스템</a> 교통사고 데이터 크롤러입니다. 권한승인이 된 아이디를 준비해서 아래 커맨드로 실행해주시면 됩니다. <code>data/kids-accident-27.json</code>은 어린이 교통사고, <code>data/kids-accident-29.json</code>는 어린이보호구역 내 어린이교통사고입니다. 어린이 교통사고가 아닌 전체 교통사고 데이터를 수집하려면 <code>--kids=0</code> 으로 설정해주세요.</p>
+<pre class="bash"><code>$ python TaasCrawler.py run # 어린이 교통사고 데이터 수집
+$ python TaasCrawler.py run --kids=0 # 전체 교통사고 데이터 수집</code></pre>
 </div>
 <div id="preprocess.py" class="section level2">
 <h2>3. Preprocess.py</h2>
 <p>크롤링된 데이터를 전처리합니다. 전처리된 데이터는 해당 디렉토리에 <code>kids-accident-pp.json</code>, <code>kids-accident-pp.geojson</code> 파일로 저장됩 니다. 어린이 데이터가 아닌 전체 교통사고 데이터를 전처리하는 경우에는 <code>--kids=0</code> 으로 설정해주세요.</p>
-<pre class="bash"><code>$ python Preprocess.py run</code></pre>
+<pre class="bash"><code>$ python Preprocess.py run # 어린이 교통사고 데이터 전처리
+$ python Preprocess.py run --kids=0 # 전체 교통사고 데이터 전처리</code></pre>
 </div>
 <div id="clustering.py" class="section level2">
 <h2>4. Clustering.py</h2>
+<p>전처리된 데이터를 클러스터링합니다. 클러스터는 <code>data/cluster.geojson</code>, 클러스터 지역에 속하는 사고들은 <code>acdnt-cls.geojson</code>에 저장 됩니다.</p>
+<pre class="bash"><code>$ python Clustering.py run</code></pre>
 </div>
+<div id="schoolzone.py" class="section level2">
+<h2>5. Schoolzone.py</h2>
+<ul>
+<li><a href="http://data.nsdi.go.kr/dataset/20180927ds0002/resource/f791be59-3153-491d-8952-8e015d0ef6bf?inner_span=True">국토정보지리원 연속수치지형도 안전지대 데이터</a></li>
+<li><a href="http://www.gisdeveloper.co.kr/?p=2332">대한민국 행정구역 경계 데이터</a></li>
+</ul>
+<p>어린이 보호구역 데이터와 서울시 경계 파일을 통해 서울시 내 어린이 보호구역 데이터를 WGS84(EPSG 4326) 좌표계로 추출합니다. 결과는 <code>data/maps/schoolzone-seoul.geojson</code>으로 저장됩니다.</p>
+<pre class="bash"><code>$ python Schoolzone.py</code></pre>
+</div>
+<div id="clustervisualization.py" class="section level2">
+<h2>6. ClusterVisualization.py</h2>
+<p>클러스터와 어린이 보호구역의 경계를 지도 시각화하여 <code>docs/cluster.html</code>로 저장합니다.</p>
+<pre class="bash"><code>$ python ClusterVisualization.py</code></pre>
 </div>
 
 

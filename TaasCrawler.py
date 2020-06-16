@@ -35,6 +35,7 @@ class TaasCrawler:
 
     def set_login_info(self):
         ID = input("ID: ")
+        # noinspection PyPep8Naming
         PWD = getpass("Password: ")
         self.LOGIN_INFO = {
             'loginid': str(ID),

@@ -26,18 +26,21 @@
 
 ```
 
-## 1. Requirements
+## 1. Environment
 
 - Ubuntu 20.04 LTS
 - 16GB RAM
+- Python 3.7
 
 ```bash
 pip install -r requirements.txt
+conda install --channel conda-forge rtree
 ```
 
 ## 2. TaasCrawler.py
 
 [TAAS GIS 시스템](http://taas.koroad.or.kr/gis/mcm/mcl/initMap.do?menuId=GIS_GMP_STS_RSN) 교통사고 데이터 크롤러입니다.
+2007~2019년의 차 대 사람 어린이 교통사고, 어린이 구역 내 어린이 교통사고 데이터를 크롤링합니다.
  권한승인이 된 아이디를 준비해서 아래 커맨드로 실행해주시면 됩니다. `data/kids-accident-27.json`은 어린이 교통사고,
  `data/kids-accident-29.json`는 어린이보호구역 내 어린이교통사고입니다. 어린이 교통사고가 아닌 전체 교통사고 데이터를 수집하려면
  `--kids=0` 으로 설정해주세요.

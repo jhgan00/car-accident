@@ -12,18 +12,21 @@
 ├── Schoolzone.py
 ├── TaasCrawler.py
 ├── data
-│   ├── maps
-│   │   ├── CTPRVN.dbf
-│   │   ├── CTPRVN.prj
-│   │   ├── CTPRVN.shp
-│   │   ├── CTPRVN.shx
-│   │   ├── N3A_A0053326.dbf
-│   │   ├── N3A_A0053326.shp
-│   │   ├── N3A_A0053326.shx
-│   │   └── schoolzone-seoul.geojson
-│   └── 전국어린이보호구역표준데이터.csv
+│   ├── acdnt-cls.geojson
+│   ├── cluster.geojson
+│   ├── kids-accident-pp.geojson
+│   ├── kids-accident-pp.json
+│   └── maps
+│       ├── CTPRVN.dbf
+│       ├── CTPRVN.prj
+│       ├── CTPRVN.shp
+│       ├── CTPRVN.shx
+│       ├── N3A_A0053326.dbf
+│       ├── N3A_A0053326.shp
+│       ├── N3A_A0053326.shx
+│       ├── schoolzone-seoul.geojson
+│       └── seoul.geojson
 └── requirements.txt
-
 ```
 
 ## 1. Environment
